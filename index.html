@@ -1,0 +1,474 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EHCPP — Creative Brief</title>
+<style>
+  :root{
+    --bg:#f6f7f4;
+    --card:#ffffff;
+    --ink:#1f2a24;
+    --muted:#5d6b63;
+    --line:#e3e6df;
+    --accent:#2f6f5e;
+    --accent-soft:#e7f1ec;
+    --rec:#c0492f;
+    --rec-soft:#f7e7e2;
+    --shadow:0 1px 2px rgba(31,42,36,.05),0 8px 24px rgba(31,42,36,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font:16px/1.55 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:760px;margin:0 auto;padding:32px 20px 120px}
+
+  header.top{margin-bottom:8px}
+  .kicker{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);font-weight:700}
+  h1{font-size:30px;line-height:1.15;margin:8px 0 10px;font-weight:700}
+  .lede{color:var(--muted);font-size:16px;margin:0 0 6px}
+  .how{
+    background:var(--accent-soft);
+    border:1px solid #d6e6df;
+    border-radius:14px;
+    padding:14px 16px;
+    margin:18px 0 8px;
+    font-size:14.5px;
+    color:#2c4339;
+  }
+  .how b{color:var(--ink)}
+  .how ul{margin:8px 0 0;padding-left:18px}
+  .how li{margin:3px 0}
+
+  /* sticky progress */
+  .progress-bar{
+    position:sticky;top:0;z-index:20;
+    background:rgba(246,247,244,.92);
+    backdrop-filter:saturate(140%) blur(6px);
+    padding:10px 0 8px;margin:14px 0 6px;
+    border-bottom:1px solid var(--line);
+  }
+  .progress-meta{display:flex;justify-content:space-between;font-size:12.5px;color:var(--muted);margin-bottom:6px}
+  .track{height:7px;background:#e7eae4;border-radius:99px;overflow:hidden}
+  .fill{height:100%;width:0;background:var(--accent);border-radius:99px;transition:width .3s ease}
+  .saved-flag{color:var(--accent);opacity:0;transition:opacity .25s}
+  .saved-flag.show{opacity:1}
+
+  section.block{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:16px;
+    padding:20px 20px 8px;
+    margin:18px 0;
+    box-shadow:var(--shadow);
+  }
+  .sec-head{display:flex;align-items:baseline;gap:10px;margin-bottom:2px}
+  .sec-num{font-size:13px;font-weight:700;color:var(--accent);min-width:24px}
+  .sec-title{font-size:19px;font-weight:700;margin:0}
+  .sec-intro{color:var(--muted);font-size:14.5px;margin:4px 0 14px 34px}
+
+  .q{margin:0 0 18px 34px}
+  .q-label{font-weight:600;font-size:15.5px;margin-bottom:2px;display:block}
+  .q-help{color:var(--muted);font-size:13.5px;margin:0 0 8px}
+  .field-row{position:relative}
+  textarea{
+    width:100%;
+    min-height:74px;
+    resize:vertical;
+    border:1px solid var(--line);
+    border-radius:11px;
+    padding:11px 46px 11px 12px;
+    font:15px/1.5 inherit;
+    color:var(--ink);
+    background:#fcfdfb;
+    outline:none;
+    transition:border-color .15s, box-shadow .15s;
+  }
+  textarea:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+  textarea.filled{background:#fff;border-color:#cfe0d8}
+
+  .mic{
+    position:absolute;top:8px;right:8px;
+    width:32px;height:32px;border-radius:9px;
+    border:1px solid var(--line);
+    background:#fff;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    color:var(--muted);
+    transition:all .15s;
+  }
+  .mic:hover{border-color:var(--accent);color:var(--accent)}
+  .mic svg{width:16px;height:16px}
+  .mic.recording{
+    background:var(--rec-soft);border-color:var(--rec);color:var(--rec);
+    animation:pulse 1.2s infinite;
+  }
+  @keyframes pulse{0%{box-shadow:0 0 0 0 rgba(192,73,47,.35)}70%{box-shadow:0 0 0 7px rgba(192,73,47,0)}100%{box-shadow:0 0 0 0 rgba(192,73,47,0)}}
+  .listening-note{font-size:12.5px;color:var(--rec);margin-top:5px;display:none}
+  .listening-note.show{display:block}
+
+  /* footer actions */
+  .actions{
+    position:sticky;bottom:0;z-index:20;
+    background:linear-gradient(180deg,rgba(246,247,244,0),var(--bg) 38%);
+    padding:22px 0 10px;margin-top:6px;
+    display:flex;gap:10px;flex-wrap:wrap;align-items:center;
+  }
+  button.act{
+    border:1px solid var(--accent);
+    background:var(--accent);color:#fff;
+    font:600 15px inherit;
+    padding:11px 18px;border-radius:11px;cursor:pointer;
+    transition:filter .15s;
+  }
+  button.act:hover{filter:brightness(1.06)}
+  button.act.ghost{background:#fff;color:var(--accent)}
+  button.act.subtle{background:#fff;color:var(--muted);border-color:var(--line)}
+  .toast{
+    font-size:13.5px;color:var(--accent);opacity:0;transition:opacity .25s;
+  }
+  .toast.show{opacity:1}
+  .nomic{font-size:12px;color:#9aa49d;margin:10px 0 0 34px;display:none}
+  .nomic.show{display:block}
+  footer.foot{margin-top:24px;color:#9aa49d;font-size:12.5px;text-align:center}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="kicker">EHCPP · Creative Brief</div>
+    <h1>A few questions before we build the strategy</h1>
+    <p class="lede">For Prayash. This is the raw material I'll use to plan how we talk about the Eastern Himalayan Dialogue and grow EHCPP's presence. Answer in your own words — rough and honest beats polished.</p>
+    <div class="how">
+      <b>How this works</b>
+      <ul>
+        <li>Type your answers, or hit the mic on any box and just talk — it transcribes as you speak. Good for brain-dumping.</li>
+        <li>Your answers save automatically in this browser, so you can stop and come back.</li>
+        <li>When you're done, hit <b>Copy all answers</b> or <b>Download</b> at the bottom and send it over.</li>
+        <li>Skip anything that doesn't apply. No need to fill every box.</li>
+      </ul>
+    </div>
+  </header>
+
+  <div class="progress-bar">
+    <div class="progress-meta">
+      <span id="count">0 of 0 answered</span>
+      <span class="saved-flag" id="savedFlag">saved</span>
+    </div>
+    <div class="track"><div class="fill" id="fill"></div></div>
+  </div>
+
+  <div id="form"></div>
+  <p class="nomic" id="nomic">Heads up: voice typing needs Chrome or Edge. In other browsers the mic buttons won't work, but you can still type.</p>
+
+  <div class="actions">
+    <button class="act" id="copyBtn">Copy all answers</button>
+    <button class="act ghost" id="docBtn">Download as Word</button>
+    <button class="act subtle" id="txtBtn">Download as .txt</button>
+    <span class="toast" id="toast"></span>
+  </div>
+
+  <footer class="foot">Nothing here is sent anywhere. It lives only in this file and your browser until you copy or download it.</footer>
+</div>
+
+<script>
+const brief = [
+  {
+    title:"EHCPP, in your words",
+    intro:"The website language is formal. I need how you'd actually explain it.",
+    questions:[
+      {id:"what", label:"In one or two plain sentences, what does EHCPP do?", help:"Pretend you're telling a smart friend who's never heard of it. Drop the institutional phrasing."},
+      {id:"why", label:"Why did you start it? What gap were you seeing?", help:"The honest origin — what annoyed you, what was missing for the Eastern Himalayas."},
+      {id:"fund", label:"How is EHCPP funded or sustained right now?", help:"This shapes what we can say publicly and how we frame independence. Grants, self-funded, partners, event-driven — whatever it is."},
+      {id:"year", label:"If the next year goes well, what's different about EHCPP?", help:"More recognition? A ministry citing your work? Funding? Be concrete."}
+    ]
+  },
+  {
+    title:"The event — Eastern Himalayan Dialogue",
+    intro:"This is the main thing we're building toward. Go granular here — the more detail, the sharper the content.",
+    questions:[
+      {id:"ev_when", label:"Exact dates, venue, and city — and is any of that public yet?", help:"Even if tentative. Tell me what's confirmed vs still moving."},
+      {id:"ev_oneline", label:"Describe the Dialogue in your own words.", help:"You said it's a common ground for policymakers, academics and practitioners from Delhi and the region. Expand on that."},
+      {id:"ev_format", label:"What's the format and shape?", help:"How many days, how many sessions/panels, panels vs talks vs roundtables, roughly how many attendees, opening/keynote?"},
+      {id:"ev_econ", label:"Pillar — Economy: what's the actual question or angle?", help:"What about the regional economy is being debated, and who's speaking to it?"},
+      {id:"ev_climate", label:"Pillar — Climate change: what's the angle?", help:"What climate issue specific to the Eastern Himalayas, and who's on it?"},
+      {id:"ev_geo", label:"Pillar — Geopolitics: what's the angle?", help:"Borders, China, regional security, connectivity — what's the real conversation, and who's leading it?"},
+      {id:"ev_mps", label:"The politicians / MPs coming in — who, and what's their role at the event?", help:"Names even if tentative. Are they speaking, opening, on panels? This is a big visibility lever."},
+      {id:"ev_speakers", label:"Who else is confirmed or likely? (policymakers, academics, practitioners)", help:"Names, affiliations, anyone with a following. Mark confirmed vs invited."},
+      {id:"ev_diff", label:"What makes this different from every other policy conference?", help:"Why does this one matter? What can only happen here?"},
+      {id:"ev_access", label:"Is it invite-only or open? Can people register or attend?", help:"Tells me whether we're driving registrations, applications, or just awareness."},
+      {id:"ev_benefit", label:"Who actually benefits from this event, and how?", help:"Who walks away better off — the region, specific institutions, students, the speakers, EHCPP itself? Be specific about what they get out of it."},
+      {id:"ev_common", label:"Would you want everyday people there too, beyond the policy crowd? If so, who?", help:"Students, local journalists, community leaders, young people from the region? Or is this strictly a closed policy room? Either answer is fine, I just need to know who you picture in the room."},
+      {id:"ev_outcome", label:"The single most important outcome you want from the event itself?", help:"Not social — the event. One thing."},
+      {id:"ev_dream", label:"Dream coverage or headline coming out of it?", help:"Who covers it, what do they say, who shares it?"}
+    ]
+  },
+  {
+    title:"What you want from the social push",
+    intro:"So I can aim the strategy at a real target instead of generic 'engagement'.",
+    questions:[
+      {id:"goal_rank", label:"Rank what matters most: event attendance, general awareness, credibility with peers, attracting speakers/partners, attracting funders.", help:"Or write your own. Just tell me the order."},
+      {id:"goal_who", label:"Who do you most want to notice EHCPP through this push?", help:"Be specific — a particular ministry, regional academics, national media, funders, regional youth?"},
+      {id:"goal_win", label:"What would make you say this worked?", help:"A number, a specific person reaching out, a piece of coverage, a full room — name it."},
+      {id:"goal_when", label:"When should momentum start building?", help:"How many weeks before September do you want to be visibly active?"}
+    ]
+  },
+  {
+    title:"Audience",
+    intro:"Who we're actually talking to.",
+    questions:[
+      {id:"aud_person", label:"Picture one person who should be following EHCPP. Describe them.", help:"Age-ish, what they do, why they'd care, what they're worried about for the region."},
+      {id:"aud_where", label:"Where is that audience already spending time online?", help:"Instagram, LinkedIn, X, WhatsApp groups, YouTube — your honest read."},
+      {id:"aud_trust", label:"Which regional voices, pages, or outlets do they already trust?", help:"Accounts we could learn from, collaborate with, or get reshared by."},
+      {id:"aud_policy", label:"Who in the policy/academic world do you want talking about EHCPP?", help:"Names or types of people. This guides who we tag, quote, and feature."}
+    ]
+  },
+  {
+    title:"Voice and lines you won't cross",
+    intro:"So the content sounds like EHCPP and never makes you wince.",
+    questions:[
+      {id:"voice_tone", label:"How should EHCPP sound? Formal and academic, or plain and accessible?", help:"Be honest about where on that line you sit. There's no wrong answer, but I need to know."},
+      {id:"voice_admire", label:"Any think tanks, pages, or people whose content you like? What about it?", help:"Links or names. Tell me what specifically you'd want to borrow."},
+      {id:"voice_no", label:"Anything that would make you cringe to post? Hard nos?", help:"Tone, topics, formats, anything political you want to stay clear of."},
+      {id:"voice_face", label:"How comfortable are you and Reeya being the face — on camera, quoted, in photos?", help:"From 'happy to film' to 'absolutely not'. This decides whether we go founder-led or not."}
+    ]
+  },
+  {
+    title:"What you already have",
+    intro:"Raw material I can work with so we're not starting from zero.",
+    questions:[
+      {id:"as_event", label:"Photos or video from the March session or any past event?", help:"What exists and is it usable/shareable?"},
+      {id:"as_brand", label:"Brand assets — logo files, colours, fonts, templates?", help:"And who made the website, in case we need to match it."},
+      {id:"as_research", label:"Research, reports, or data we could turn into posts?", help:"What's published or close to it that we can mine for content."},
+      {id:"as_insights", label:"Eastern Himalayan Insights — what is it, and can we feature it?", help:"Format, how often, where it lives, whether it's ready to promote."}
+    ]
+  },
+  {
+    title:"The honest logistics",
+    intro:"This decides what's actually doable, so don't aspirational-answer it.",
+    questions:[
+      {id:"lo_who", label:"Who will actually make and post content on your side?", help:"You, Reeya, an intern, a designer, me? Who hits publish?"},
+      {id:"lo_time", label:"Realistically, how many hours a week can your side give this?", help:"For reviews, supplying info, recording stuff. Honest number."},
+      {id:"lo_approve", label:"Who approves content, and how fast can you turn it around?", help:"If everything needs your sign-off and you're busy, I plan differently."},
+      {id:"lo_tools", label:"Tools you already use or pay for?", help:"Canva, a scheduler, design help, email tool, anything."},
+      {id:"lo_handles", label:"Existing social handles, and can you give access?", help:"Links to whatever exists now, even if empty. And who holds the logins."}
+    ]
+  },
+  {
+    title:"Anything else",
+    intro:"The stuff my questions missed.",
+    questions:[
+      {id:"misc", label:"Brain-dump anything else I should know.", help:"Constraints, sensitivities, ideas you're attached to, people to avoid, a vibe you're going for. Hit the mic and ramble if that's easier."}
+    ]
+  }
+];
+
+const STORAGE_KEY = "ehcpp_brief_v1";
+const form = document.getElementById("form");
+let allFields = [];
+
+// ---- render ----
+brief.forEach((sec, si)=>{
+  const block = document.createElement("section");
+  block.className = "block";
+  block.innerHTML = `
+    <div class="sec-head">
+      <span class="sec-num">${String(si+1).padStart(2,"0")}</span>
+      <h2 class="sec-title">${sec.title}</h2>
+    </div>
+    <p class="sec-intro">${sec.intro}</p>`;
+  sec.questions.forEach(q=>{
+    const wrap = document.createElement("div");
+    wrap.className = "q";
+    wrap.innerHTML = `
+      <label class="q-label" for="${q.id}">${q.label}</label>
+      <p class="q-help">${q.help}</p>
+      <div class="field-row">
+        <textarea id="${q.id}" data-label="${q.label.replace(/"/g,'&quot;')}" placeholder="Type, or tap the mic and talk…"></textarea>
+        <button class="mic" type="button" data-target="${q.id}" title="Voice type" aria-label="Voice type">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/></svg>
+        </button>
+      </div>
+      <div class="listening-note" id="note-${q.id}">Listening… speak now. Tap the mic again to stop.</div>`;
+    block.appendChild(wrap);
+  });
+  form.appendChild(block);
+});
+
+allFields = Array.from(document.querySelectorAll("textarea"));
+
+// ---- progress + autosave ----
+const fill = document.getElementById("fill");
+const count = document.getElementById("count");
+const savedFlag = document.getElementById("savedFlag");
+let saveTimer;
+
+function refreshProgress(){
+  const done = allFields.filter(t=>t.value.trim().length>0).length;
+  const total = allFields.length;
+  fill.style.width = (total? (done/total*100):0) + "%";
+  count.textContent = `${done} of ${total} answered`;
+  allFields.forEach(t=>t.classList.toggle("filled", t.value.trim().length>0));
+}
+
+function save(){
+  const data = {};
+  allFields.forEach(t=> data[t.id]=t.value);
+  try{
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    savedFlag.classList.add("show");
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(()=>savedFlag.classList.remove("show"), 1100);
+  }catch(e){/* file:// storage may be blocked; ignore */}
+}
+
+function load(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(!raw) return;
+    const data = JSON.parse(raw);
+    allFields.forEach(t=>{ if(data[t.id]!=null) t.value = data[t.id]; });
+  }catch(e){}
+}
+
+load();
+refreshProgress();
+
+allFields.forEach(t=>{
+  t.addEventListener("input", ()=>{ refreshProgress(); save(); });
+});
+
+// ---- voice dictation ----
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+if(!SR){ document.getElementById("nomic").classList.add("show"); }
+
+let activeRec = null;
+let activeBtn = null;
+
+function stopActive(){
+  if(activeRec){ try{ activeRec.stop(); }catch(e){} }
+}
+
+document.querySelectorAll(".mic").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    if(!SR){ return; }
+    const id = btn.dataset.target;
+    const ta = document.getElementById(id);
+    const note = document.getElementById("note-"+id);
+
+    // toggle off if this one is recording
+    if(activeBtn === btn){ stopActive(); return; }
+    // stop any other
+    stopActive();
+
+    const rec = new SR();
+    rec.lang = "en-IN";
+    rec.continuous = true;
+    rec.interimResults = true;
+    let base = ta.value ? ta.value.replace(/\s+$/,"") + " " : "";
+    let finalText = "";
+
+    rec.onstart = ()=>{
+      activeRec = rec; activeBtn = btn;
+      btn.classList.add("recording");
+      note.classList.add("show");
+    };
+    rec.onresult = (e)=>{
+      let interim = "";
+      for(let i=e.resultIndex; i<e.results.length; i++){
+        const chunk = e.results[i][0].transcript;
+        if(e.results[i].isFinal){ finalText += chunk; }
+        else { interim += chunk; }
+      }
+      ta.value = (base + finalText + interim).replace(/\s+/g," ").trimStart();
+      refreshProgress();
+    };
+    rec.onerror = ()=>{ cleanup(); };
+    rec.onend = ()=>{ cleanup(); save(); };
+
+    function cleanup(){
+      btn.classList.remove("recording");
+      note.classList.remove("show");
+      if(activeBtn===btn){ activeBtn=null; activeRec=null; }
+    }
+
+    try{ rec.start(); }catch(e){}
+  });
+});
+
+// ---- compile answers ----
+function compile(){
+  const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  let out = `EHCPP — Creative Brief Responses\nFilled: ${today}\n\n`;
+  brief.forEach((sec,si)=>{
+    out += `${"=".repeat(50)}\n${si+1}. ${sec.title.toUpperCase()}\n${"=".repeat(50)}\n\n`;
+    sec.questions.forEach(q=>{
+      const ta = document.getElementById(q.id);
+      const ans = ta.value.trim();
+      out += `Q: ${q.label}\nA: ${ans ? ans : "(skipped)"}\n\n`;
+    });
+  });
+  return out;
+}
+
+function compileHTML(){
+  const today = new Date().toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});
+  let h = `<html><head><meta charset="utf-8"></head><body style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1f2a24">`;
+  h += `<h1 style="font-size:18pt">EHCPP — Creative Brief Responses</h1><p style="color:#5d6b63">Filled: ${today}</p>`;
+  brief.forEach((sec,si)=>{
+    h += `<h2 style="font-size:14pt;color:#2f6f5e;border-bottom:1px solid #ccc;padding-bottom:3px">${si+1}. ${sec.title}</h2>`;
+    sec.questions.forEach(q=>{
+      const ans = document.getElementById(q.id).value.trim();
+      h += `<p style="margin:10px 0 2px;font-weight:bold">${q.label}</p>`;
+      h += `<p style="margin:0 0 8px;white-space:pre-wrap">${ans ? ans.replace(/</g,"&lt;") : "<i style='color:#999'>(skipped)</i>"}</p>`;
+    });
+  });
+  h += `</body></html>`;
+  return h;
+}
+
+const toast = document.getElementById("toast");
+function flash(msg){
+  toast.textContent = msg;
+  toast.classList.add("show");
+  setTimeout(()=>toast.classList.remove("show"), 2200);
+}
+
+document.getElementById("copyBtn").addEventListener("click", async ()=>{
+  const text = compile();
+  try{
+    await navigator.clipboard.writeText(text);
+    flash("Copied. Paste it into a doc or send it over.");
+  }catch(e){
+    // fallback
+    const ta = document.createElement("textarea");
+    ta.value = text; document.body.appendChild(ta); ta.select();
+    try{ document.execCommand("copy"); flash("Copied."); }catch(_){ flash("Couldn't copy — use Download instead."); }
+    document.body.removeChild(ta);
+  }
+});
+
+function download(filename, content, mime){
+  const blob = new Blob([content], {type:mime});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(a.href);
+}
+
+document.getElementById("docBtn").addEventListener("click", ()=>{
+  download("EHCPP-creative-brief.doc", compileHTML(), "application/msword");
+  flash("Word file downloaded.");
+});
+document.getElementById("txtBtn").addEventListener("click", ()=>{
+  download("EHCPP-creative-brief.txt", compile(), "text/plain");
+  flash("Text file downloaded.");
+});
+</script>
+</body>
+</html>
